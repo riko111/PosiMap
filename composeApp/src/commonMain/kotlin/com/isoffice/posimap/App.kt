@@ -19,19 +19,19 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 @Preview
 fun App() {
     MaterialTheme {
-        var stageSize by remember { mutableStateOf<Pair<Float, Float>?>(null) }
-        if (stageSize == null) {
-            StageSizeScreen { width, depth ->
-                stageSize = width to depth
+        var stageInfo by remember { mutableStateOf<StageInfo?>(null) }
+        if (stageInfo == null) {
+            StageSizeScreen { title, width, depth ->
+                stageInfo = StageInfo(title, width, depth)
             }
         } else {
-            StageSizeResult(stageSize!!)
+            StageSizeResult(stageInfo!!)
         }
     }
 }
 
 @Composable
-private fun StageSizeResult(stage: Pair<Float, Float>) {
+private fun StageSizeResult(stage: StageInfo) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -39,6 +39,12 @@ private fun StageSizeResult(stage: Pair<Float, Float>) {
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text("Stage Size: ${stage.first}m x ${stage.second}m")
+        Text("『${stage.title}』の舞台サイズ：${stage.width}m × ${stage.depth}m")
     }
 }
+
+private data class StageInfo(
+    val title: String,
+    val width: Float,
+    val depth: Float,
+)
