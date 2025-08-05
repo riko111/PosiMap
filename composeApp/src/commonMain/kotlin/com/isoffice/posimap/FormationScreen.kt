@@ -254,7 +254,7 @@ private fun MemberDialog(
             TextButton(
                 onClick = {
                     val color = selectedColor ?: Color.Gray
-                    val disp = if (display.isNotBlank()) display else name.take(1)
+                    val disp = display.ifBlank { name.take(1) }
                     onAdd(name, disp, color)
                 }
             ) {
