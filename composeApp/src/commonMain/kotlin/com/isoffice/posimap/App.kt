@@ -39,6 +39,6 @@ private fun StageSizeResult(stage: Pair<Float, Float>) {
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text("Stage Size: ${stage.first}m x ${stage.second}m")
+        Text("舞台サイズ：${stage.first}m × ${stage.second}m")
     }
 }
