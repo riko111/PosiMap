@@ -15,9 +15,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.isoffice.posimap.model.StageInfo
 
 @Composable
-fun StageSizeScreen(onStart: (String, Float, Float) -> Unit) {
+fun StageSizeScreen(onStart: (StageInfo) -> Unit) {
     var titleInput by remember { mutableStateOf("") }
     var widthInput by remember { mutableStateOf("") }
     var depthInput by remember { mutableStateOf("") }
@@ -51,7 +52,7 @@ fun StageSizeScreen(onStart: (String, Float, Float) -> Unit) {
             onClick = {
                 val width = widthInput.toFloatOrNull() ?: 0f
                 val depth = depthInput.toFloatOrNull() ?: 0f
-                onStart(titleInput, width, depth)
+               onStart(StageInfo(titleInput, width, depth))
             }
         ) {
             Text("設定する")
