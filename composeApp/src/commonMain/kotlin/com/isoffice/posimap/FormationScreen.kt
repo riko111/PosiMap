@@ -1,12 +1,14 @@
 package com.isoffice.posimap
 
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.mutableStateListOf
@@ -16,42 +18,90 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.consumeAllChanges
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import com.isoffice.posimap.model.Member
+import com.isoffice.posimap.model.Scene
 import com.isoffice.posimap.model.StageInfo
 import kotlin.random.Random
 
 @Composable
 fun FormationScreen(stage: StageInfo) {
     val members = remember { mutableStateListOf<Member>() }
+    val scenes = remember {
+        mutableStateListOf(
+            Scene(Random.nextLong().toString(), "", mutableMapOf())
+        )
+    }
+    var currentSceneIndex by remember { mutableStateOf(0) }
     var showDialog by remember { mutableStateOf(false) }
 
-    Box(modifier = Modifier.fillMaxSize()) {
-        StageView(stage, members)
+    Column(modifier = Modifier.fillMaxSize()) {
+        Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
+            StageView(stage, members, scenes[currentSceneIndex])
 
-        FloatingActionButton(
-            onClick = { if (members.size < 15) showDialog = true },
-            modifier = Modifier.align(Alignment.BottomEnd).padding(16.dp)
-        ) {
-            Text("+")
+            FloatingActionButton(
+                onClick = { if (members.size < 15) showDialog = true },
+                modifier = Modifier.align(Alignment.BottomEnd).padding(16.dp)
+            ) {
+                Text("+")
+            }
         }
+
+        SceneControls(
+            scenes = scenes,
+            currentIndex = currentSceneIndex,
+            onSelect = { index ->
+                loadMembersFromScene(scenes[index], members, stage)
+                currentSceneIndex = index
+            },
+            onAddBefore = {
+                val newPositions = members.associate { it.id to (it.x to it.y) }.toMutableMap()
+                val insertIndex = currentSceneIndex
+                scenes.add(insertIndex, Scene(Random.nextLong().toString(), "", newPositions))
+                currentSceneIndex = insertIndex
+            },
+            onAddAfter = {
+                val newPositions = members.associate { it.id to (it.x to it.y) }.toMutableMap()
+                val insertIndex = currentSceneIndex + 1
+                scenes.add(insertIndex, Scene(Random.nextLong().toString(), "", newPositions))
+                currentSceneIndex = insertIndex
+            },
+            onRemove = {
+                if (scenes.size > 1) {
+                    scenes.removeAt(currentSceneIndex)
+                    currentSceneIndex = currentSceneIndex.coerceAtMost(scenes.lastIndex)
+                    loadMembersFromScene(scenes[currentSceneIndex], members, stage)
+                }
+            }
+        )
+
+        OutlinedTextField(
+            value = scenes[currentSceneIndex].memo,
+            onValueChange = { scenes[currentSceneIndex].memo = it },
+            label = { Text("メモ") },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+        )
     }
 
     if (showDialog) {
         MemberDialog(
             onAdd = { name, displayChar, color ->
-                members.add(
-                    Member(
-                        id = Random.nextLong().toString(),
-                        name = name,
-                        displayChar = displayChar,
-                        color = color,
-                        x = stage.width / 2f,
-                        y = stage.depth / 2f
-                    )
+                val centerX = stage.width / 2f
+                val centerY = stage.depth / 2f
+                val member = Member(
+                    id = Random.nextLong().toString(),
+                    name = name,
+                    displayChar = displayChar,
+                    color = color,
+                    x = centerX,
+                    y = centerY
                 )
+                members.add(member)
+                scenes.forEach { it.positions[member.id] = centerX to centerY }
                 showDialog = false
             },
             onDismiss = { showDialog = false }
@@ -60,7 +110,7 @@ fun FormationScreen(stage: StageInfo) {
 }
 
 @Composable
-private fun StageView(stage: StageInfo, members: List<Member>) {
+private fun StageView(stage: StageInfo, members: List<Member>, scene: Scene) {
     BoxWithConstraints(
         modifier = Modifier
             .fillMaxSize()
@@ -103,7 +153,7 @@ private fun StageView(stage: StageInfo, members: List<Member>) {
         }
 
         members.forEach { member ->
-            MemberItem(member, scaleX, scaleY, scaleXPx, scaleYPx, stage)
+            MemberItem(member, scaleX, scaleY, scaleXPx, scaleYPx, stage, scene)
         }
     }
 }
@@ -115,10 +165,11 @@ private fun MemberItem(
     scaleY: Dp,
     scaleXPx: Float,
     scaleYPx: Float,
-    stage: StageInfo
+    stage: StageInfo,
+    scene: Scene
 ) {
-    var x by remember { mutableStateOf(member.x) }
-    var y by remember { mutableStateOf(member.y) }
+    var x by remember(scene) { mutableStateOf(member.x) }
+    var y by remember(scene) { mutableStateOf(member.y) }
     Box(
         modifier = Modifier
             // scaleX and scaleY represent the dp size of one meter on the stage.
@@ -135,6 +186,7 @@ private fun MemberItem(
                     y = (y + dragAmount.y / scaleYPx).coerceIn(0f, stage.depth)
                     member.x = x
                     member.y = y
+                    scene.positions[member.id] = x to y
                 }
             },
         contentAlignment = Alignment.Center
@@ -213,5 +265,50 @@ private fun MemberDialog(
             TextButton(onClick = onDismiss) { Text("キャンセル") }
         }
     )
+}
+
+@Composable
+private fun SceneControls(
+    scenes: List<Scene>,
+    currentIndex: Int,
+    onSelect: (Int) -> Unit,
+    onAddBefore: () -> Unit,
+    onAddAfter: () -> Unit,
+    onRemove: () -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Button(onClick = onAddBefore, modifier = Modifier.padding(4.dp)) { Text("＋前") }
+        LazyRow(
+            modifier = Modifier.weight(1f),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            itemsIndexed(scenes) { index, _ ->
+                if (index == currentIndex) {
+                    Button(onClick = { onSelect(index) }) { Text((index + 1).toString()) }
+                } else {
+                    OutlinedButton(onClick = { onSelect(index) }) { Text((index + 1).toString()) }
+                }
+            }
+        }
+        Button(onClick = onAddAfter, modifier = Modifier.padding(4.dp)) { Text("＋後") }
+        Button(
+            onClick = onRemove,
+            enabled = scenes.size > 1,
+            modifier = Modifier.padding(4.dp)
+        ) { Text("削除") }
+    }
+}
+
+private fun loadMembersFromScene(scene: Scene, members: List<Member>, stage: StageInfo) {
+    members.forEach { member ->
+        val pos = scene.positions[member.id] ?: (stage.width / 2f to stage.depth / 2f)
+        member.x = pos.first
+        member.y = pos.second
+    }
 }
 

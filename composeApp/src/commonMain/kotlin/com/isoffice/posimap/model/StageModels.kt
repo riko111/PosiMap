@@ -19,3 +19,10 @@ data class Member(
     var y: Float,
 )
 
+/** A formation state for a given scene. */
+data class Scene(
+    val id: String,
+    var memo: String,
+    val positions: MutableMap<String, Pair<Float, Float>>
+)
+
