@@ -31,13 +31,13 @@ fun StageSizeScreen(onStart: (Float, Float) -> Unit) {
         OutlinedTextField(
             value = widthInput,
             onValueChange = { widthInput = it },
-            label = { Text("Stage Width (m)") },
+            label = { Text("舞台の幅 (m)") },
             singleLine = true
         )
         OutlinedTextField(
             value = depthInput,
             onValueChange = { depthInput = it },
-            label = { Text("Stage Depth (m)") },
+            label = { Text("舞台の奥行 (m)") },
             singleLine = true
         )
         Button(
@@ -47,7 +47,7 @@ fun StageSizeScreen(onStart: (Float, Float) -> Unit) {
                 onStart(width, depth)
             }
         ) {
-            Text("Start")
+            Text("設定する")
         }
     }
 }
