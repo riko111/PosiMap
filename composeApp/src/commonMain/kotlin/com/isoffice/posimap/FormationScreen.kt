@@ -21,7 +21,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.platform.LocalDensity
 import com.isoffice.posimap.model.Member
 import com.isoffice.posimap.model.StageInfo
-import java.util.UUID
+import kotlin.random.Random
 
 @Composable
 fun FormationScreen(stage: StageInfo) {
@@ -44,7 +44,7 @@ fun FormationScreen(stage: StageInfo) {
             onAdd = { name, displayChar, color ->
                 members.add(
                     Member(
-                        id = UUID.randomUUID().toString(),
+                        id = Random.nextLong().toString(),
                         name = name,
                         displayChar = displayChar,
                         color = color,
