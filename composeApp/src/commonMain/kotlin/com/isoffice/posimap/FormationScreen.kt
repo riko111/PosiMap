@@ -121,7 +121,11 @@ private fun MemberItem(
     var y by remember { mutableStateOf(member.y) }
     Box(
         modifier = Modifier
-            .offset(x * scaleX, y * scaleY)
+            // scaleX and scaleY represent the dp size of one meter on the stage.
+            // Multiply them on the left side so the operator extension on Dp is used
+            // (Dp * Float -> Dp). This converts the member's position in meters to
+            // device independent pixels for the offset modifier.
+            .offset(scaleX * x, scaleY * y)
             .size(32.dp)
             .background(member.color, CircleShape)
             .pointerInput(scaleXPx, scaleYPx) {
