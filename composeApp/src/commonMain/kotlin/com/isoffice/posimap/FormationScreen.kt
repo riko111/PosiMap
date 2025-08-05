@@ -15,6 +15,7 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.consumeAllChanges
 import androidx.compose.ui.input.pointer.pointerInput
@@ -24,6 +25,7 @@ import androidx.compose.ui.unit.dp
 import com.isoffice.posimap.model.Member
 import com.isoffice.posimap.model.Scene
 import com.isoffice.posimap.model.StageInfo
+import kotlin.math.min
 import kotlin.random.Random
 
 @Composable
@@ -37,77 +39,104 @@ fun FormationScreen(stage: StageInfo) {
     var currentSceneIndex by remember { mutableStateOf(0) }
     var showDialog by remember { mutableStateOf(false) }
 
-    Column(modifier = Modifier.fillMaxSize()) {
-        Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
-            StageView(stage, members, scenes[currentSceneIndex])
+    BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+        val isTablet = maxWidth > 600.dp
+        var memoVisible by remember { mutableStateOf(isTablet) }
 
-            FloatingActionButton(
-                onClick = { if (members.size < 15) showDialog = true },
-                modifier = Modifier.align(Alignment.BottomEnd).padding(16.dp)
+        Column(modifier = Modifier.fillMaxSize()) {
+            Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
+                StageView(stage, members, scenes[currentSceneIndex])
+
+                FloatingActionButton(
+                    onClick = { if (members.size < 15) showDialog = true },
+                    modifier = Modifier.align(Alignment.BottomEnd).padding(16.dp)
+                ) {
+                    Text("+")
+                }
+            }
+
+            SceneControls(
+                scenes = scenes,
+                currentIndex = currentSceneIndex,
+                onSelect = { index ->
+                    loadMembersFromScene(scenes[index], members, stage)
+                    currentSceneIndex = index
+                },
+                onAddBefore = {
+                    val newPositions = members.associate { it.id to (it.x to it.y) }.toMutableMap()
+                    val insertIndex = currentSceneIndex
+                    scenes.add(insertIndex, Scene(Random.nextLong().toString(), "", newPositions))
+                    currentSceneIndex = insertIndex
+                },
+                onAddAfter = {
+                    val newPositions = members.associate { it.id to (it.x to it.y) }.toMutableMap()
+                    val insertIndex = currentSceneIndex + 1
+                    scenes.add(insertIndex, Scene(Random.nextLong().toString(), "", newPositions))
+                    currentSceneIndex = insertIndex
+                },
+                onRemove = {
+                    if (scenes.size > 1) {
+                        scenes.removeAt(currentSceneIndex)
+                        currentSceneIndex = currentSceneIndex.coerceAtMost(scenes.lastIndex)
+                        loadMembersFromScene(scenes[currentSceneIndex], members, stage)
+                    }
+                }
+            )
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                Text("+")
+                Button(onClick = { /* TODO 保存処理 */ }, modifier = Modifier.weight(1f)) {
+                    Text("保存")
+                }
+                Button(onClick = { /* TODO 共有処理 */ }, modifier = Modifier.weight(1f)) {
+                    Text("共有")
+                }
+                if (!isTablet) {
+                    TextButton(onClick = { memoVisible = !memoVisible }) {
+                        Text("メモ")
+                    }
+                }
+            }
+
+            if (memoVisible) {
+                OutlinedTextField(
+                    value = scenes[currentSceneIndex].memo,
+                    onValueChange = { scenes[currentSceneIndex].memo = it },
+                    label = { Text("メモ") },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp)
+                )
             }
         }
 
-        SceneControls(
-            scenes = scenes,
-            currentIndex = currentSceneIndex,
-            onSelect = { index ->
-                loadMembersFromScene(scenes[index], members, stage)
-                currentSceneIndex = index
-            },
-            onAddBefore = {
-                val newPositions = members.associate { it.id to (it.x to it.y) }.toMutableMap()
-                val insertIndex = currentSceneIndex
-                scenes.add(insertIndex, Scene(Random.nextLong().toString(), "", newPositions))
-                currentSceneIndex = insertIndex
-            },
-            onAddAfter = {
-                val newPositions = members.associate { it.id to (it.x to it.y) }.toMutableMap()
-                val insertIndex = currentSceneIndex + 1
-                scenes.add(insertIndex, Scene(Random.nextLong().toString(), "", newPositions))
-                currentSceneIndex = insertIndex
-            },
-            onRemove = {
-                if (scenes.size > 1) {
-                    scenes.removeAt(currentSceneIndex)
-                    currentSceneIndex = currentSceneIndex.coerceAtMost(scenes.lastIndex)
-                    loadMembersFromScene(scenes[currentSceneIndex], members, stage)
-                }
-            }
-        )
-
-        OutlinedTextField(
-            value = scenes[currentSceneIndex].memo,
-            onValueChange = { scenes[currentSceneIndex].memo = it },
-            label = { Text("メモ") },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
-        )
-    }
-
-    if (showDialog) {
-        MemberDialog(
-            onAdd = { name, displayChar, color ->
-                val centerX = stage.width / 2f
-                val centerY = stage.depth / 2f
-                val member = Member(
-                    id = Random.nextLong().toString(),
-                    name = name,
-                    displayChar = displayChar,
-                    color = color,
-                    x = centerX,
-                    y = centerY
-                )
-                members.add(member)
-                scenes.forEach { it.positions[member.id] = centerX to centerY }
-                showDialog = false
-            },
-            onDismiss = { showDialog = false }
-        )
+        if (showDialog) {
+            MemberDialog(
+                onAdd = { name, displayChar, color ->
+                    val centerX = stage.width / 2f
+                    val centerY = stage.depth / 2f
+                    val member = Member(
+                        id = Random.nextLong().toString(),
+                        name = name,
+                        displayChar = displayChar,
+                        color = color,
+                        x = centerX,
+                        y = centerY
+                    )
+                    members.add(member)
+                    scenes.forEach { it.positions[member.id] = centerX to centerY }
+                    showDialog = false
+                },
+                onDismiss = { showDialog = false }
+            )
+        }
     }
 }
+
 
 @Composable
 private fun StageView(stage: StageInfo, members: List<Member>, scene: Scene) {
@@ -116,44 +145,54 @@ private fun StageView(stage: StageInfo, members: List<Member>, scene: Scene) {
             .fillMaxSize()
             .padding(16.dp)
     ) {
-        val width = maxWidth
-        val height = maxHeight
-        val scaleX = width / stage.width
-        val scaleY = height / stage.depth
+        val grid = 0.9f
+        val widthDp = maxWidth
+        val heightDp = maxHeight
+        val scale = min(widthDp / (stage.width + grid * 2f), heightDp / stage.depth)
         val density = LocalDensity.current
-        val scaleXPx = with(density) { scaleX.toPx() }
-        val scaleYPx = with(density) { scaleY.toPx() }
+        val scalePx = with(density) { scale.toPx() }
+        val gridPx = grid * scalePx
+        val stageWidthPx = stage.width * scalePx
+        val stageHeightPx = stage.depth * scalePx
+        val totalWidthPx = stageWidthPx + gridPx * 2f
+        val widthPx = with(density) { widthDp.toPx() }
+        val heightPx = with(density) { heightDp.toPx() }
+        val offsetXPx = (widthPx - totalWidthPx) / 2f
+        val offsetYPx = (heightPx - stageHeightPx) / 2f
+        val offsetXDp = with(density) { offsetXPx.toDp() }
+        val offsetYDp = with(density) { offsetYPx.toDp() }
+        val gridDp = scale * grid
 
         Canvas(modifier = Modifier.fillMaxSize()) {
-            drawRect(Color.White, size = size)
-            val centerX = size.width / 2f
-            val centerY = size.height / 2f
-            val stepX = 0.9f * scaleXPx
-            var x = centerX
-            while (x <= size.width) {
-                drawLine(Color.LightGray, Offset(x, 0f), Offset(x, size.height))
-                x += stepX
+            drawRect(
+                Color.White,
+                topLeft = Offset(offsetXPx, offsetYPx),
+                size = Size(totalWidthPx, stageHeightPx)
+            )
+            var x = offsetXPx
+            while (x <= offsetXPx + totalWidthPx + 0.5f) {
+                drawLine(
+                    Color.LightGray,
+                    Offset(x, offsetYPx),
+                    Offset(x, offsetYPx + stageHeightPx)
+                )
+                x += gridPx
             }
-            x = centerX - stepX
-            while (x >= 0f) {
-                drawLine(Color.LightGray, Offset(x, 0f), Offset(x, size.height))
-                x -= stepX
-            }
-            val stepY = 0.9f * scaleYPx
-            var y = centerY
-            while (y <= size.height) {
-                drawLine(Color.LightGray, Offset(0f, y), Offset(size.width, y))
-                y += stepY
-            }
-            y = centerY - stepY
-            while (y >= 0f) {
-                drawLine(Color.LightGray, Offset(0f, y), Offset(size.width, y))
-                y -= stepY
+            var y = offsetYPx
+            while (y <= offsetYPx + stageHeightPx + 0.5f) {
+                drawLine(
+                    Color.LightGray,
+                    Offset(offsetXPx, y),
+                    Offset(offsetXPx + totalWidthPx, y)
+                )
+                y += gridPx
             }
         }
 
+        val memberOffsetX = offsetXDp + gridDp
+        val memberOffsetY = offsetYDp
         members.forEach { member ->
-            MemberItem(member, scaleX, scaleY, scaleXPx, scaleYPx, stage, scene)
+            MemberItem(member, scale, scalePx, memberOffsetX, memberOffsetY, stage, scene)
         }
     }
 }
@@ -161,10 +200,10 @@ private fun StageView(stage: StageInfo, members: List<Member>, scene: Scene) {
 @Composable
 private fun MemberItem(
     member: Member,
-    scaleX: Dp,
-    scaleY: Dp,
-    scaleXPx: Float,
-    scaleYPx: Float,
+    scale: Dp,
+    scalePx: Float,
+    offsetX: Dp,
+    offsetY: Dp,
     stage: StageInfo,
     scene: Scene
 ) {
@@ -172,18 +211,14 @@ private fun MemberItem(
     var y by remember(scene) { mutableStateOf(member.y) }
     Box(
         modifier = Modifier
-            // scaleX and scaleY represent the dp size of one meter on the stage.
-            // Multiply them on the left side so the operator extension on Dp is used
-            // (Dp * Float -> Dp). This converts the member's position in meters to
-            // device independent pixels for the offset modifier.
-            .offset(scaleX * x, scaleY * y)
+            .offset(offsetX + scale * x, offsetY + scale * y)
             .size(32.dp)
             .background(member.color, CircleShape)
-            .pointerInput(scaleXPx, scaleYPx) {
+            .pointerInput(scalePx) {
                 detectDragGestures { change, dragAmount ->
                     change.consumeAllChanges()
-                    x = (x + dragAmount.x / scaleXPx).coerceIn(0f, stage.width)
-                    y = (y + dragAmount.y / scaleYPx).coerceIn(0f, stage.depth)
+                    x = (x + dragAmount.x / scalePx).coerceIn(0f, stage.width)
+                    y = (y + dragAmount.y / scalePx).coerceIn(0f, stage.depth)
                     member.x = x
                     member.y = y
                     scene.positions[member.id] = x to y
