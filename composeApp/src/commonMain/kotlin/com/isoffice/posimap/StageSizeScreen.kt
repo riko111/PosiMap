@@ -1,0 +1,53 @@
+package com.isoffice.posimap
+
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+
+@Composable
+fun StageSizeScreen(onStart: (Float, Float) -> Unit) {
+    var widthInput by remember { mutableStateOf("") }
+    var depthInput by remember { mutableStateOf("") }
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        OutlinedTextField(
+            value = widthInput,
+            onValueChange = { widthInput = it },
+            label = { Text("Stage Width (m)") },
+            singleLine = true
+        )
+        OutlinedTextField(
+            value = depthInput,
+            onValueChange = { depthInput = it },
+            label = { Text("Stage Depth (m)") },
+            singleLine = true
+        )
+        Button(
+            onClick = {
+                val width = widthInput.toFloatOrNull() ?: 0f
+                val depth = depthInput.toFloatOrNull() ?: 0f
+                onStart(width, depth)
+            }
+        ) {
+            Text("Start")
+        }
+    }
+}
