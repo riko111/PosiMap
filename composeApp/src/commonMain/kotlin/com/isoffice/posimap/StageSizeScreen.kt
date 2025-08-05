@@ -52,7 +52,7 @@ fun StageSizeScreen(onStart: (StageInfo) -> Unit) {
             onClick = {
                 val width = widthInput.toFloatOrNull() ?: 0f
                 val depth = depthInput.toFloatOrNull() ?: 0f
-                onStart(StageInfo(titleInput, width, depth))
+               onStart(StageInfo(titleInput, width, depth))
             }
         ) {
             Text("設定する")

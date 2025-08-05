@@ -15,10 +15,9 @@ fun App() {
     MaterialTheme {
         var stageInfo by remember { mutableStateOf<StageInfo?>(null) }
         if (stageInfo == null) {
-            StageSizeScreen { info -> stageInfo = info }
+           StageSizeScreen { info -> stageInfo = info }
         } else {
             FormationScreen(stageInfo!!)
         }
     }
 }
-
