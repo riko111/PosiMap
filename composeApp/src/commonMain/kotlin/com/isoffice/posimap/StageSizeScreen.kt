@@ -17,7 +17,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun StageSizeScreen(onStart: (Float, Float) -> Unit) {
+fun StageSizeScreen(onStart: (String, Float, Float) -> Unit) {
+    var titleInput by remember { mutableStateOf("") }
     var widthInput by remember { mutableStateOf("") }
     var depthInput by remember { mutableStateOf("") }
 
@@ -28,6 +29,12 @@ fun StageSizeScreen(onStart: (Float, Float) -> Unit) {
         verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        OutlinedTextField(
+            value = titleInput,
+            onValueChange = { titleInput = it },
+            label = { Text("演目名") },
+            singleLine = true
+        )
         OutlinedTextField(
             value = widthInput,
             onValueChange = { widthInput = it },
@@ -44,7 +51,7 @@ fun StageSizeScreen(onStart: (Float, Float) -> Unit) {
             onClick = {
                 val width = widthInput.toFloatOrNull() ?: 0f
                 val depth = depthInput.toFloatOrNull() ?: 0f
-                onStart(width, depth)
+                onStart(titleInput, width, depth)
             }
         ) {
             Text("設定する")
