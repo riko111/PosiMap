@@ -15,9 +15,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.isoffice.posimap.model.StageInfo
 
 @Composable
-fun StageSizeScreen(onStart: (Float, Float) -> Unit) {
+fun StageSizeScreen(onStart: (StageInfo) -> Unit) {
+    var titleInput by remember { mutableStateOf("") }
     var widthInput by remember { mutableStateOf("") }
     var depthInput by remember { mutableStateOf("") }
 
@@ -29,25 +31,31 @@ fun StageSizeScreen(onStart: (Float, Float) -> Unit) {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         OutlinedTextField(
+            value = titleInput,
+            onValueChange = { titleInput = it },
+            label = { Text("演目名") },
+            singleLine = true
+        )
+        OutlinedTextField(
             value = widthInput,
             onValueChange = { widthInput = it },
-            label = { Text("Stage Width (m)") },
+            label = { Text("舞台の幅 (m)") },
             singleLine = true
         )
         OutlinedTextField(
             value = depthInput,
             onValueChange = { depthInput = it },
-            label = { Text("Stage Depth (m)") },
+            label = { Text("舞台の奥行 (m)") },
             singleLine = true
         )
         Button(
             onClick = {
                 val width = widthInput.toFloatOrNull() ?: 0f
                 val depth = depthInput.toFloatOrNull() ?: 0f
-                onStart(width, depth)
+                onStart(StageInfo(titleInput, width, depth))
             }
         ) {
-            Text("Start")
+            Text("設定する")
         }
     }
 }
