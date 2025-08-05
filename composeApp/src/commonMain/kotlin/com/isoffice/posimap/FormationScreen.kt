@@ -28,15 +28,15 @@ fun FormationScreen(stage: StageInfo) {
     val members = remember { mutableStateListOf<Member>() }
     var showDialog by remember { mutableStateOf(false) }
 
-    Scaffold(
-        topBar = { TopAppBar(title = { Text(stage.title) }) },
-        floatingActionButton = {
-            FloatingActionButton(onClick = { if (members.size < 15) showDialog = true }) {
-                Text("+")
-            }
+    Box(modifier = Modifier.fillMaxSize()) {
+        StageView(stage, members)
+
+        FloatingActionButton(
+            onClick = { if (members.size < 15) showDialog = true },
+            modifier = Modifier.align(Alignment.BottomEnd).padding(16.dp)
+        ) {
+            Text("+")
         }
-    ) { innerPadding ->
-        StageView(stage, members, Modifier.padding(innerPadding))
     }
 
     if (showDialog) {
@@ -60,9 +60,9 @@ fun FormationScreen(stage: StageInfo) {
 }
 
 @Composable
-private fun StageView(stage: StageInfo, members: List<Member>, modifier: Modifier = Modifier) {
+private fun StageView(stage: StageInfo, members: List<Member>) {
     BoxWithConstraints(
-        modifier = modifier
+        modifier = Modifier
             .fillMaxSize()
             .padding(16.dp)
     ) {
