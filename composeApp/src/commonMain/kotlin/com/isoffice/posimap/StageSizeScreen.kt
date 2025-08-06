@@ -17,10 +17,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.isoffice.posimap.model.StageInfo
 
+/** 舞台のサイズを入力する画面 */
 @Composable
 fun StageSizeScreen(onStart: (StageInfo) -> Unit) {
+    // ユーザーが入力した演目名
     var titleInput by remember { mutableStateOf("") }
+    // 舞台の幅(m)
     var widthInput by remember { mutableStateOf("") }
+    // 舞台の奥行(m)
     var depthInput by remember { mutableStateOf("") }
 
     Column(
@@ -30,18 +34,21 @@ fun StageSizeScreen(onStart: (StageInfo) -> Unit) {
         verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        // 演目名入力欄
         OutlinedTextField(
             value = titleInput,
             onValueChange = { titleInput = it },
             label = { Text("演目名") },
             singleLine = true
         )
+        // 舞台の幅入力欄
         OutlinedTextField(
             value = widthInput,
             onValueChange = { widthInput = it },
             label = { Text("舞台の幅 (m)") },
             singleLine = true
         )
+        // 舞台の奥行入力欄
         OutlinedTextField(
             value = depthInput,
             onValueChange = { depthInput = it },
@@ -50,9 +57,10 @@ fun StageSizeScreen(onStart: (StageInfo) -> Unit) {
         )
         Button(
             onClick = {
+                // 入力値を数値に変換しStageInfoを作成してコールバック
                 val width = widthInput.toFloatOrNull() ?: 0f
                 val depth = depthInput.toFloatOrNull() ?: 0f
-               onStart(StageInfo(titleInput, width, depth))
+                onStart(StageInfo(titleInput, width, depth))
             }
         ) {
             Text("設定する")

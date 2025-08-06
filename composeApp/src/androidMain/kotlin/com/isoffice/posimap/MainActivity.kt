@@ -9,10 +9,12 @@ import androidx.compose.ui.tooling.preview.Preview
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
+        // システムUIのレイアウトを端まで広げる
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
 
         setContent {
+            // Composeアプリのエントリーポイント
             App()
         }
     }
@@ -21,5 +23,6 @@ class MainActivity : ComponentActivity() {
 @Preview
 @Composable
 fun AppAndroidPreview() {
+    // Android Studio用のプレビュー
     App()
 }

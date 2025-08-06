@@ -29,25 +29,34 @@ import com.isoffice.posimap.model.StageInfo
 import kotlin.math.min
 import kotlin.random.Random
 
+/** フォーメーションを編集する画面 */
 @Composable
 fun FormationScreen(stage: StageInfo) {
+    // 編集対象となるメンバー一覧
     val members = remember { mutableStateListOf<Member>() }
+    // シーンごとのフォーメーション情報
     val scenes = remember {
         mutableStateListOf(
             Scene(Random.nextLong().toString(), "", mutableMapOf())
         )
     }
+    // 現在選択されているシーンのインデックス
     var currentSceneIndex by remember { mutableStateOf(0) }
+    // メンバー追加ダイアログの表示フラグ
     var showDialog by remember { mutableStateOf(false) }
 
     BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+        // 画面幅からタブレットかどうかを判定
         val isTablet = maxWidth > 600.dp
+        // メモ欄の表示状態。タブレットでは常に表示
         var memoVisible by remember { mutableStateOf(isTablet) }
 
         Column(modifier = Modifier.fillMaxSize()) {
             Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
+                // 舞台の描画とメンバー表示
                 StageView(stage, members, scenes[currentSceneIndex])
 
+                // メンバー追加用のFAB。最大15人まで追加可能
                 FloatingActionButton(
                     onClick = { if (members.size < 15) showDialog = true },
                     modifier = Modifier.align(Alignment.BottomEnd).padding(16.dp)
@@ -56,6 +65,7 @@ fun FormationScreen(stage: StageInfo) {
                 }
             }
 
+            // シーンの追加や切り替えを行う操作ボタン群
             SceneControls(
                 scenes = scenes,
                 currentIndex = currentSceneIndex,
@@ -84,6 +94,7 @@ fun FormationScreen(stage: StageInfo) {
                 }
             )
 
+            // 保存・共有ボタンとメモ表示切り替え
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -103,6 +114,7 @@ fun FormationScreen(stage: StageInfo) {
                 }
             }
 
+            // メモ欄
             if (memoVisible) {
                 OutlinedTextField(
                     value = scenes[currentSceneIndex].memo,
@@ -116,8 +128,10 @@ fun FormationScreen(stage: StageInfo) {
         }
 
         if (showDialog) {
+            // メンバー追加ダイアログ
             MemberDialog(
                 onAdd = { name, displayChar, color ->
+                    // 初期位置は舞台の中央
                     val centerX = stage.width / 2f
                     val centerY = stage.depth / 2f
                     val member = Member(
@@ -141,12 +155,13 @@ fun FormationScreen(stage: StageInfo) {
 
 @Composable
 private fun StageView(stage: StageInfo, members: List<Member>, scene: Scene) {
+    // 舞台のグリッドを描画し、メンバーを配置するビュー
     BoxWithConstraints(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp)
     ) {
-        val grid = 0.9f
+        val grid = 0.9f // 90cmグリッド
         val widthDp = maxWidth
         val heightDp = maxHeight
         val scale = min(widthDp / (stage.width + grid * 2f), heightDp / stage.depth)
@@ -165,6 +180,7 @@ private fun StageView(stage: StageInfo, members: List<Member>, scene: Scene) {
         val gridDp = scale * grid
 
         Canvas(modifier = Modifier.fillMaxSize()) {
+            // 背景とグリッド線の描画
             drawRect(
                 Color.White,
                 topLeft = Offset(offsetXPx, offsetYPx),
@@ -208,6 +224,7 @@ private fun MemberItem(
     stage: StageInfo,
     scene: Scene
 ) {
+    // シーンごとの座標を保持する
     var x by remember(scene) { mutableStateOf(member.x) }
     var y by remember(scene) { mutableStateOf(member.y) }
     Box(
@@ -217,6 +234,7 @@ private fun MemberItem(
             .background(member.color, CircleShape)
             .pointerInput(scalePx) {
                 detectDragGestures { change, dragAmount ->
+                    // ドラッグ操作でメンバーを移動
                     change.consumeAllChanges()
                     x = (x + dragAmount.x / scalePx).coerceIn(0f, stage.width)
                     y = (y + dragAmount.y / scalePx).coerceIn(0f, stage.depth)
@@ -236,8 +254,11 @@ private fun MemberDialog(
     onAdd: (String, String, Color) -> Unit,
     onDismiss: () -> Unit
 ) {
+    // 入力中のメンバー名
     var name by remember { mutableStateOf("") }
+    // 表示文字
     var display by remember { mutableStateOf("") }
+    // 選択された色
     var selectedColor by remember { mutableStateOf<Color?>(null) }
     val colors = listOf(
         Color.Red,
@@ -249,9 +270,9 @@ private fun MemberDialog(
         Color.Gray,
         Color.Black,
         Color.White,
-        Color(0xFFFFA500), // Orange
-        Color(0xFF800080), // Purple
-        Color(0xFF00FFFF)  // Aqua
+        Color(0xFFFFA500), // オレンジ
+        Color(0xFF800080), // パープル
+        Color(0xFF00FFFF)  // アクア
     )
 
     AlertDialog(
@@ -312,12 +333,14 @@ private fun SceneControls(
     onAddAfter: () -> Unit,
     onRemove: () -> Unit
 ) {
+    // シーン番号や追加・削除ボタンを表示する行
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
+        // 現在の前にシーンを追加
         Button(onClick = onAddBefore, modifier = Modifier.padding(4.dp)) { Text("＋前") }
         LazyRow(
             modifier = Modifier.weight(1f),
@@ -325,13 +348,16 @@ private fun SceneControls(
         ) {
             itemsIndexed(scenes) { index, _ ->
                 if (index == currentIndex) {
+                    // 選択中のシーン
                     Button(onClick = { onSelect(index) }) { Text((index + 1).toString()) }
                 } else {
                     OutlinedButton(onClick = { onSelect(index) }) { Text((index + 1).toString()) }
                 }
             }
         }
+        // 現在の後にシーンを追加
         Button(onClick = onAddAfter, modifier = Modifier.padding(4.dp)) { Text("＋後") }
+        // シーンを削除（最低1シーンは残す）
         Button(
             onClick = onRemove,
             enabled = scenes.size > 1,
@@ -341,6 +367,7 @@ private fun SceneControls(
 }
 
 private fun loadMembersFromScene(scene: Scene, members: List<Member>, stage: StageInfo) {
+    // シーンに保存された座標をメンバーに適用する
     members.forEach { member ->
         val pos = scene.positions[member.id] ?: (stage.width / 2f to stage.depth / 2f)
         member.x = pos.first

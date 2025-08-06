@@ -6,6 +6,7 @@ import kotlinx.browser.document
 
 @OptIn(ExperimentalComposeUiApi::class)
 fun main() {
+    // ブラウザのDOMにComposeコンテンツを描画する
     ComposeViewport(document.body!!) {
         App()
     }
