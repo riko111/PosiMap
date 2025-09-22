@@ -6,7 +6,7 @@
         android:icon="@mipmap/ic_launcher"
         android:label="立ち位置くん"
         android:supportsRtl="true"
-        android:theme="@style/Theme.MaterialComponents.DayNight.NoActionBar">
+        android:theme="@style/Theme.PosiMap">
         <activity
             android:name=".MainActivity"
             android:exported="true">
