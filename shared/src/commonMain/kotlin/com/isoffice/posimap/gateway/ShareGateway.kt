@@ -1,11 +1,7 @@
 package com.isoffice.posimap.gateway
 
-import com.isoffice.posimap.model.Performance
 
 interface ShareGateway {
-    fun sharePerformance(performance: Performance)
+    fun share(bytes: ByteArray, filename: String, mime: String = "application/vnd.posimap+json")
 }
 
-object NoOpShareGateway : ShareGateway {
-    override fun sharePerformance(performance: Performance) = Unit
-}
