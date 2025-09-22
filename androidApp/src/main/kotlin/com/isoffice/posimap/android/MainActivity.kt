@@ -1,6 +1,5 @@
 package com.isoffice.posimap.android
 
-import android.content.Context
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -33,6 +32,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.core.content.edit
 
 class MainActivity : ComponentActivity() {
 
@@ -55,7 +55,7 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun loadSettings(): PerformanceSettings? {
-        val prefs = getPreferences(Context.MODE_PRIVATE)
+        val prefs = getPreferences(MODE_PRIVATE)
         val title = prefs.getString(KEY_TITLE, null) ?: return null
         val width = prefs.getInt(KEY_STAGE_WIDTH, -1)
         val height = prefs.getInt(KEY_STAGE_HEIGHT, -1)
@@ -64,12 +64,12 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun saveSettings(settings: PerformanceSettings) {
-        val prefs = getPreferences(Context.MODE_PRIVATE)
-        prefs.edit()
-            .putString(KEY_TITLE, settings.title)
-            .putInt(KEY_STAGE_WIDTH, settings.stageWidth)
-            .putInt(KEY_STAGE_HEIGHT, settings.stageHeight)
-            .apply()
+        val prefs = getPreferences(MODE_PRIVATE)
+        prefs.edit {
+            putString(KEY_TITLE, settings.title)
+                .putInt(KEY_STAGE_WIDTH, settings.stageWidth)
+                .putInt(KEY_STAGE_HEIGHT, settings.stageHeight)
+        }
     }
 
     companion object {
