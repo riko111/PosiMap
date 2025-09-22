@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">立ち位置くん</string>
+    <string name="performance_setup_title">演目の設定</string>
+    <string name="performance_setup_description">最初に演目名と舞台のサイズを入力してください。</string>
+    <string name="performance_title_label">演目名</string>
+    <string name="stage_width_label">舞台の幅</string>
+    <string name="stage_height_label">舞台の奥行き</string>
+    <string name="setup_submit">決定</string>
+    <string name="summary_title_format">演目名: %1$s</string>
+    <string name="summary_stage_format">舞台サイズ: 幅%1$d × 奥行き%2$d</string>
+    <string name="edit_button">編集</string>
+    <string name="input_error_required">必須項目です</string>
+    <string name="input_error_positive_number">1以上の数値を入力してください</string>
+</resources>
