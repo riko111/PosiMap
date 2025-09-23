@@ -8,14 +8,12 @@ objects = {
 /* Begin PBXBuildFile section */
 58C4A7F629A8F2E800F4A1B0 /* iosApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58C4A80029A8F2E800F4A1B0 /* iosApp.swift */; };
 58C4A7F729A8F2E800F4A1B0 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58C4A80129A8F2E800F4A1B0 /* ContentView.swift */; };
-58C4A7F829A8F2E800F4A1B0 /* ShareGatewayIos.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58C4A80229A8F2E800F4A1B0 /* ShareGatewayIos.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 58C4A7FE29A8F2E800F4A1B0 /* iosApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = iosApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 58C4A80029A8F2E800F4A1B0 /* iosApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = iosApp.swift; sourceTree = "<group>"; };
 58C4A80129A8F2E800F4A1B0 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
-58C4A80229A8F2E800F4A1B0 /* ShareGatewayIos.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareGatewayIos.swift; sourceTree = "<group>"; };
 58C4A80329A8F2E800F4A1B0 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -43,7 +41,6 @@ isa = PBXGroup;
 children = (
 58C4A80029A8F2E800F4A1B0 /* iosApp.swift */,
 58C4A80129A8F2E800F4A1B0 /* ContentView.swift */,
-58C4A80229A8F2E800F4A1B0 /* ShareGatewayIos.swift */,
 58C4A80329A8F2E800F4A1B0 /* Info.plist */,
 );
 path = iosApp;
@@ -124,7 +121,6 @@ runOnlyForDeploymentPostprocessing = 0;
 isa = PBXSourcesBuildPhase;
 buildActionMask = 2147483647;
 files = (
-58C4A7F829A8F2E800F4A1B0 /* ShareGatewayIos.swift in Sources */,
 58C4A7F729A8F2E800F4A1B0 /* ContentView.swift in Sources */,
 58C4A7F629A8F2E800F4A1B0 /* iosApp.swift in Sources */,
 );

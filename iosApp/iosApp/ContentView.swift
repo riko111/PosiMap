@@ -2,7 +2,7 @@ import SwiftUI
 import shared
 
 struct ContentView: View {
-    private let repository = PerformanceRepository(shareGateway: ShareGatewayIos())
+    private let repository = PerformanceRepository(shareGateway: ShareGateway())
 
     var body: some View {
         let performances = repository.getPerformances() as? [Performance] ?? []
